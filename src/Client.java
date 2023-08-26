@@ -7,15 +7,17 @@ import java.text.*;
 import java.net.*;
 import java.io.*;
 
-public class server implements ActionListener {
+public class Client implements ActionListener {
 
     JTextField text;
-    JPanel a1;
+    static JPanel a1;
     static Box vertical = Box.createVerticalBox();
+
     static JFrame f = new JFrame();
+
     static DataOutputStream dout;
 
-    server() {
+    Client() {
 
         f.setLayout(null);
 
@@ -66,7 +68,7 @@ public class server implements ActionListener {
         morevert.setBounds(420, 20, 10, 25);
         p1.add(morevert);
 
-        JLabel name = new JLabel("Gaitonde");
+        JLabel name = new JLabel("Bunty");
         name.setBounds(110, 15, 100, 18);
         name.setForeground(Color.WHITE);
         name.setFont(new Font("SAN_SERIF", Font.BOLD, 18));
@@ -96,7 +98,7 @@ public class server implements ActionListener {
         f.add(send);
 
         f.setSize(450, 700);
-        f.setLocation(200, 50);
+        f.setLocation(800, 50);
         f.setUndecorated(true);
         f.getContentPane().setBackground(Color.WHITE);
 
@@ -154,24 +156,26 @@ public class server implements ActionListener {
     }
 
     public static void main(String[] args) {
-        new server();
+        new Client();
 
         try {
-            ServerSocket skt = new ServerSocket(6001);
+            Socket s = new Socket("127.0.0.1", 6001);
+            DataInputStream din = new DataInputStream(s.getInputStream());
+            dout = new DataOutputStream(s.getOutputStream());
+
             while(true) {
-                Socket s = skt.accept();
-                DataInputStream din = new DataInputStream(s.getInputStream());
-                dout = new DataOutputStream(s.getOutputStream());
+                a1.setLayout(new BorderLayout());
+                String msg = din.readUTF();
+                JPanel panel = formatLabel(msg);
 
-                while(true) {
-                    String msg = din.readUTF();
-                    JPanel panel = formatLabel(msg);
+                JPanel left = new JPanel(new BorderLayout());
+                left.add(panel, BorderLayout.LINE_START);
+                vertical.add(left);
 
-                    JPanel left = new JPanel(new BorderLayout());
-                    left.add(panel, BorderLayout.LINE_START);
-                    vertical.add(left);
-                    f.validate();
-                }
+                vertical.add(Box.createVerticalStrut(15));
+                a1.add(vertical, BorderLayout.PAGE_START);
+
+                f.validate();
             }
         } catch (Exception e) {
             e.printStackTrace();
